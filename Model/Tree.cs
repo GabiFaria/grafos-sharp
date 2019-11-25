@@ -109,6 +109,7 @@ namespace grafos_sharp.Model
 
         private static void Relax(Edge<T> UtoV)
         {
+            //Se a distância de S até V é maior do que a distância de S até U + peso da aresta, então U é o novo pai de V.
             if (UtoV.to.distance > UtoV.from.distance + UtoV.weight)
             {
                 UtoV.to.distance = UtoV.from.distance + UtoV.weight;
@@ -118,17 +119,23 @@ namespace grafos_sharp.Model
 
         public static bool BellmanFord(Graph<T> graph, T s, out Graph<T> output)
         {
+            //Encontra no grafo o vértice correspondente a s.
             Vertex<T> S = graph.Vertices().Find(x => x.value.Equals(s));
             InitializeSingleSource(graph, S);
+            //Para cada vértice do grafo
             for (int i = 1; i < graph.Vertices().Count-1; i++)
             {
+                //Para cada aresta do grafo, indepedente do vértice
                 foreach (Edge<T> edge in graph.Edges())
                 {
+                    //define novos pais a partir da função Relax
                     Relax(edge);
                 }
             }
+            //Para cada aresta
             foreach (Edge<T> edge in graph.Edges())
             {
+                //Se a distância "voltando" for maior que a distancia "indo"+ peso da aresta
                 if (edge.to.distance > edge.from.distance + edge.weight)
                 {
                     output = null;
@@ -136,7 +143,7 @@ namespace grafos_sharp.Model
                 }
             }
 
-            //Retornamos o grafo gerado apartir da lista de arestas seguras
+            //Retornamos o grafo gerado a partir da lista de arestas seguras
             output = 
              new AdjacencyMatrix<T>(graph.Vertices(), graph.Edges().FindAll(x => (x.from.Equals(x.to.pi) || x.to.Equals(x.from.pi))), graph.CompareTo(), graph.isDirected);
             return true;
@@ -144,18 +151,27 @@ namespace grafos_sharp.Model
 
         public static AdjacencyMatrix<T> Dijkstra (Graph<T> graph, T s)
         {
+            //Encontro o vértice correspondente a s
             Vertex<T> S = graph.Vertices().Find(x => x.value.Equals(s));
             InitializeSingleSource(graph, S);
+            // Q é uma lista de vertices do grafo
             List<Vertex<T>> Q = graph.Vertices();
+            //R é uma lista de vertices vazia 
             List<Vertex<T>> R = new List<Vertex<T>>();
+            //Enquanto a lista nao estiver vazia
             while (Q.Count != 0)
             {
+                //ordena a lista pela distancia
                 Q = Q.OrderBy(x => x.distance).ToList();
+                // Vértice U recebe o primeiro vértice da lista 
                 Vertex<T> U = Q[0];
+                //Remove o U da lista Q
                 Q.Remove(U);
+                //Adiciona o U na lista R
                 R.Add(U);
                 foreach (Edge<T> edge in graph.Adjacent(U))
                 {
+                    //define novos pais a partir da função Relax
                     Relax(edge);
                 }
 
